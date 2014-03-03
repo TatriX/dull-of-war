@@ -47,7 +47,7 @@ func NanoServer(ws *websocket.Conn) {
 	//Кладем соединение в таблицу
 	connections[addr] = ws
 	//Создаем нового персонажа, инициализируя его некоторыми стандартными значениями
-	character := NewCharacter()
+	var player Player
 
 	fmt.Printf("Client %s connected [Total clients connected: %d]\n", addr, len(connections))
 
@@ -58,9 +58,9 @@ func NanoServer(ws *websocket.Conn) {
 
 		//Клиент отключился
 		if err == io.EOF {
-			fmt.Printf("Client %s (%s) disconnected\n", character.Name, addr)
+			fmt.Printf("Client %s (%s) disconnected\n", player.Name, addr)
 			//Удаляем его из таблиц
-			delete(characters, character.Name)
+			delete(players, player.Name)
 			delete(connections, addr)
 			//И оповещаем подключенных клиентов о том, что игрок ушел
 			go notifyClients()
@@ -73,7 +73,7 @@ func NanoServer(ws *websocket.Conn) {
 			continue
 		}
 
-		fmt.Printf("Received %d bytes from %s (%s): %s\n", n, character.Name, addr, cmd[:n])
+		fmt.Printf("Received %d bytes from %s (%s): %s\n", n, player.Name, addr, cmd[:n])
 
 		//Команды от клиента выглядят так: operation-name|{"param": "value", ...}
 		//Поэтому сначала выделяем операцию
@@ -96,14 +96,14 @@ func NanoServer(ws *websocket.Conn) {
 			//Декодируем сообщение и получаем логин
 			websocket.JSON.Unmarshal(data, ws.PayloadType, &name)
 			//Если такого персонажа нет онлайн
-			if _, ok := characters[name]; !ok && len(name) > 0 {
+			if _, ok := players[name]; !ok && len(name) > 0 {
 				//Авторизуем его
-				character.Name = name
-				characters[name] = &character
+				player.Name = name
+				players[name] = &player
 				fmt.Println(name, " logged in")
 			} else {
 				//Иначе отправляем ему ошибку
-				fmt.Println("Login failure: ", character.Name)
+				fmt.Println("Login failure: ", player.Name)
 				go sendError(ws, "Cannot login. Try another name")
 				continue
 			}

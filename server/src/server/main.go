@@ -13,11 +13,10 @@ const (
 	FRAME_DURATION = time.Second / MAX_FPS
 )
 
-// Ключами этого хэша будут имена персонажей
-var characters map[string]*Character
+var players map[string]*Player
 
 func main() {
-	characters = make(map[string]*Character, MAX_CLIENTS)
+	players = make(map[string]*Player, MAX_CLIENTS)
 	fmt.Println("Server started at ", time.Now())
 
 	// Запускаем обработчик вебсокетов

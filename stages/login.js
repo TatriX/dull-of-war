@@ -1,0 +1,4 @@
+var stage = {
+    draw: function() {
+    },
+};

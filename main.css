@@ -45,3 +45,34 @@ canvas {
 #units-list .selected {
     background: #222!important;
 }
+.stage {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#stage-login {
+    width: 400px;
+    margin-left: -200px;
+
+    height: 250px;
+    margin-top: -125px;
+
+    padding: 8px;
+    top: 50%;
+    left: 50%;
+    background: #333;
+}
+#stage-login > label, #stage-login > input {
+    display: block;
+    width: 100%;
+    padding: 8px;
+}
+
+#stage-login > button {
+    margin-top: 25px;
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+}
