@@ -2,6 +2,18 @@ function Player(name) {
     this.name = name;
     this.units = [];
     this.ap = 0; //action points = this.units.length
+};
+
+Player.prototype = new function() {
+    this.cmd = function(cmd) {
+        switch(cmd) {
+        case "pvp-start":
+            game.setStage("prepare");
+            break;
+        default:
+            console.error("Unknown cmd:" , cmd)
+        }
+    }
 
     this.startTurn = function() {
         this.ap = this.units.length;

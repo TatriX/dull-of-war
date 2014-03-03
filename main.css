@@ -52,7 +52,7 @@ canvas {
     left: 0;
 }
 
-#stage-login {
+#login-stage, #lobby-stage {
     width: 400px;
     margin-left: -200px;
 
@@ -64,13 +64,13 @@ canvas {
     left: 50%;
     background: #333;
 }
-#stage-login > label, #stage-login > input {
+#login-stage > label, #login-stage > input {
     display: block;
     width: 100%;
     padding: 8px;
 }
 
-#stage-login > button {
+#login-stage > button {
     margin-top: 25px;
     width: 100%;
     height: 60px;

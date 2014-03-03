@@ -17,10 +17,7 @@ const (
 // Ключи — адреса клиентов вида ip:port
 var connections map[string]*websocket.Conn
 
-// Эту структуру мы будем сериализовать в json и передавать клиенту
-type packet struct {
-	Error string
-}
+type packet map[string]interface{}
 
 //Настраиваем и запускаем обработку сетевых подключений
 func NanoHandler() {
@@ -92,20 +89,36 @@ func NanoServer(ws *websocket.Conn) {
 		//А теперь в зависимости от команды выполняем действия
 		switch op {
 		case "login":
-			var name string
 			//Декодируем сообщение и получаем логин
-			websocket.JSON.Unmarshal(data, ws.PayloadType, &name)
-			//Если такого персонажа нет онлайн
-			if _, ok := players[name]; !ok && len(name) > 0 {
-				//Авторизуем его
-				player.Name = name
-				players[name] = &player
-				fmt.Println(name, " logged in")
-			} else {
-				//Иначе отправляем ему ошибку
-				fmt.Println("Login failure: ", player.Name)
-				go sendError(ws, "Cannot login. Try another name")
+			var auth = &player.auth
+			websocket.JSON.Unmarshal(data, ws.PayloadType, auth)
+			player.ws = ws
+			if err := player.login(); err != nil {
+				fmt.Println("Login failure: ", err)
+				go sendError(ws, fmt.Sprintf("Cannot login: %s", err))
 				continue
+			}
+			fmt.Println(player.Name, " logged in")
+		case "pvp-request":
+			var requested Player
+			websocket.JSON.Unmarshal(data, ws.PayloadType, &requested)
+			if len(requested.Name) == 0 {
+				player.sendError("Enemy name is empty")
+				continue
+			}
+			enemy, ok := players[requested.Name]
+			if !ok {
+				go player.sendError("Cannot find requested player")
+				continue
+			}
+			enemy.pvpRequest(&player)
+		case "pvp-accept":
+			var accepted bool
+			websocket.JSON.Unmarshal(data, ws.PayloadType, &accepted)
+			if accepted {
+				player.startPvp()
+			} else {
+				player.denyPvpRequest()
 			}
 		default:
 			//Ой
@@ -121,7 +134,8 @@ func NanoServer(ws *websocket.Conn) {
 //Оповещает клиента об ошибке
 func sendError(ws *websocket.Conn, error string) {
 	//Создаем пакет, у которого заполнено только поле ошибки
-	packet := packet{Error: error}
+	packet := make(packet)
+	packet["error"] = error
 	//Кодируем его в json
 	msg, _, err := websocket.JSON.Marshal(packet)
 	if err != nil {
@@ -138,7 +152,8 @@ func sendError(ws *websocket.Conn, error string) {
 //Оповещает всех подключенных клиентов
 func notifyClients() {
 	//Формируем пакет со списком всех подключенных персонажей
-	packet := packet{}
+	packet := make(packet)
+	packet["players"] = players
 	//Кодируем его в json
 	msg, _, err := websocket.JSON.Marshal(packet)
 	if err != nil {
@@ -147,7 +162,10 @@ func notifyClients() {
 	}
 
 	//И посылаем его всем подключенным клиентам
-	for _, ws := range connections {
+	for name, ws := range connections {
+		if false {
+			fmt.Println("Sending data to ", name)
+		}
 		if _, err := ws.Write(msg); err != nil {
 			fmt.Println(err)
 			return
