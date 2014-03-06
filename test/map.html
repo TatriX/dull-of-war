@@ -14,6 +14,17 @@
            margin-left: -50px;
            z-index: 1;
          }
+         #bg {
+           position: absolute;
+           z-index: 1;
+           top: 50%;
+           left: 50%;
+           width: 1023px;
+           margin-left: -512px;
+           height: 909px;
+           margin-top: -504px;
+           display: none;
+         }
         </style>
         <script type="text/javascript"
                 src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDRPTcSHgzN6u3GhBzwuLGMoELcn1gYgso&sensor=false">
@@ -39,8 +50,9 @@
                      scale += dScale;
                      if (scale >= maxScale) {
                          clearInterval(interval);
-                         map.setZoom(13);
-                         canv.style.transform = "scale(1)";
+                         /* map.setZoom(13); */
+                         /* canv.style.transform = "scale(1)"; */
+                         document.getElementById("bg").style.display = "block";
                          return;
                      }
                      canv.style.transform = "scale(" + scale + ")";
@@ -52,6 +64,7 @@
     </head>
     <body onload="initialize()">
         <button id="zoom-btn">Zoom!</button>
+        <img id="bg" src="../assets/bg/dull-of-war.png">
         <div id="map_canvas" style="width:100%; height:100%"></div>
     </body>
 </html>
