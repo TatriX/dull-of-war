@@ -33,19 +33,19 @@
                  var canv = document.getElementById("map_canvas");
                  var scale = 1;
                  var maxScale = 10;
-                 var dScale = 0.5;
+                 var dScale = 0.25;
 
                  var interval = setInterval(function() {
                      scale += dScale;
                      if (scale >= maxScale) {
                          clearInterval(interval);
-                         map.setZoom(12);
+                         map.setZoom(13);
                          canv.style.transform = "scale(1)";
                          return;
                      }
                      canv.style.transform = "scale(" + scale + ")";
 
-                 }, 100)
+                 }, 50)
              }
          }
         </script>
